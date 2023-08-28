@@ -1,0 +1,118 @@
+@use "critical_modules/globals" as g;
+
+$def-block-size: 4.5em;
+$breakpoint: 700px;
+
+figure.pandaqi-paint {
+    margin: 0;
+    padding: 0;
+    font-size: min(1em, 16px);
+
+    canvas {
+        background-color: white;
+    }
+
+    canvas.brush-preview-canvas {
+        background-color: transparent;
+        width: $def-block-size;
+        height: $def-block-size;
+    }
+
+    .color-picker-sliders, 
+    div[data-label="hardness"], 
+    div[data-label="opacity"],
+    button[data-label="brush"],
+    button[data-label="smudge"],
+    button[data-label="download"],
+    .brush-preview {
+        @media (max-width: $breakpoint) {
+            display: none;
+        }
+    }
+
+    .paint-interface {
+        width: 100%;
+        @include g.flex-center();
+        flex-wrap: wrap;
+        gap: 1.0em;
+    }
+
+    .paint-buttons, .tool-set, .color-picker, .brush-properties {
+        @include g.flex-center();
+        flex-wrap: wrap;
+        gap: 1.0em;
+    }
+
+    button, input[type="color"]
+    {
+        transition: transform 0.2s, filter 0.2s;
+
+        &:hover {
+            transform: scale(1.04);
+            filter: drop-shadow(0 0 2px black);
+        }
+    }
+
+    input[type="color"]
+    {
+        width: $def-block-size;
+        height: $def-block-size;
+        padding: 0;
+        cursor: pointer;
+
+        &::-webkit-color-swatch-wrapper {
+            padding: 0; 
+        }
+        
+        &::-webkit-color-swatch {
+            border: 2px solid black;
+        }
+    }
+
+    .slider-input {
+        display: flex;
+        justify-content: space-between;
+        gap: 1.0em;
+    }
+
+    button {
+        font-family: g.$header-font;
+        padding: 1.0em;
+        border-radius: 0.25em;
+        font-weight: 900;
+
+        @include g.themed() {
+            background-color: g.t("midi-button-bg-color");
+        }
+    }
+
+    button[data-toggled=""]
+    {
+        background-color: gray;
+        font-weight: normal;
+        opacity: 0.75;
+    }
+
+    button[data-toggled="toggled"]
+    {
+        opacity: 1.0;
+        outline: 0.25em solid rgb(5, 82, 5);
+        filter: drop-shadow(0 0 3px black);
+    }
+
+    input {
+        font-family: g.$header-font;
+        font-size: 0.8em;
+        border-radius: 0.25em;
+        padding: 0.25em;
+        
+        @include g.themed() {
+            color: g.t("def-bg-color");
+            background-color: g.t("transparent-bg-heavy");
+        }
+    }
+
+    input:invalid {
+        outline: 0.25em solid red;
+    }
+}

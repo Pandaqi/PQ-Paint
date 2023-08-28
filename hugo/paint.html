@@ -1,0 +1,6 @@
+<figure class="pandaqi-paint no-hover">
+    {{- $caption := or (.Get "caption") "" -}}
+    {{- with $caption -}}
+    <figcaption class="side-note"><span>{{- $caption -}}</span></figcaption>
+    {{- end -}}
+</figure>
