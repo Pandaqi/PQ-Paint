@@ -6,7 +6,14 @@ import Config from "./config"
 
 export default class PandaqiPaint
 {
-    constructor(node)
+    node: HTMLElement
+    brush: Brush
+    tools: Tools
+    history: HTMLCanvasElement[]
+    canvas: PaintCanvas
+    interface: PaintInterface
+
+    constructor(node:HTMLElement)
     {
         this.node = node;
         this.brush = new Brush();

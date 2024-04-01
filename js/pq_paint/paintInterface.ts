@@ -1,11 +1,29 @@
 import Color from "./color"
 import Config from "./config"
+import PandaqiPaint from "./pandaqiPaint";
+
+interface SliderParams
+{
+    min?: number
+    max?: number
+    step?: number
+    node?: HTMLElement
+    label?: string
+    title?: string
+    value?: number
+    callback?: Function
+}
 
 export default class PaintInterface
 {
-    constructor(pqPaint)
+    pqPaint: PandaqiPaint;
+    node: HTMLElement;
+    brushPreview: HTMLDivElement;
+
+    constructor(pqPaint : PandaqiPaint)
     {
         this.pqPaint = pqPaint;
+        this.node = null;
         this.createHTML();
     }
 
@@ -151,7 +169,7 @@ export default class PaintInterface
         const subCont = document.createElement("div");
         cont.appendChild(subCont);
 
-        const params = {
+        const params:SliderParams = {
             node: subCont,
             label: "Opacity",
             title: "Modify how transparent the brush is",
@@ -176,7 +194,7 @@ export default class PaintInterface
         this.createSlider(params);
     }
 
-    createSlider(params = {})
+    createSlider(params:SliderParams = {})
     {
         const parent = params.node || this.node;
         
@@ -193,12 +211,12 @@ export default class PaintInterface
         const inp = document.createElement("input");
         cont.appendChild(inp);
         inp.type = "range";
-        inp.min = params.min ?? 0;
-        inp.max = params.max ?? 1;
-        inp.step = params.step || 0.05;
+        inp.min = (params.min ?? 0).toString();
+        inp.max = (params.max ?? 1).toString();
+        inp.step = (params.step || 0.05).toString();
 
         const avgValue = 0.5*(parseFloat(inp.min) + parseFloat(inp.max));
-        inp.value = params.value ?? avgValue;
+        inp.value = (params.value ?? avgValue).toString();
 
         const emptyCallback = (val) => {};
         const callback = params.callback || emptyCallback;

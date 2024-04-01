@@ -1,7 +1,18 @@
+import { BrushParams } from "./brush";
 import Color from "./color"
 
 class Config
 {
+    RADIUS_BOUNDS: { min: number; max: number; };
+    MAX_UNDO: number;
+    MAX_DIFFERENCE_FOR_FLOOD_FILL: number;
+    PEN_TOOL_STEP_SIZE: number;
+    BRUSH_TOOL_STEP_SIZE: number;
+    DEFAULT_BRUSH_PARAMS: BrushParams;
+    DEFAULT_TOOL: string;
+    toolTooltips: Record<string, string>;
+    eventNode: HTMLDivElement;
+
     constructor()
     {
         this.RADIUS_BOUNDS = { min: 1, max: 72 };

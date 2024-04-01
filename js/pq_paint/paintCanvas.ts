@@ -1,17 +1,28 @@
 import Point from "./point"
 import Color from "./color"
 import Config from "./config"
+import PandaqiPaint from "./pandaqiPaint";
+import { ToolParams } from "./tools/main";
 
 export default class PaintCanvas
 {
-    constructor(pqPaint) 
+    pqPaint: PandaqiPaint;
+    drawing: boolean;
+    lastDrawPos: Point;
+    canvasResolution: { width: number; height: number; };
+    canvasOutput: HTMLCanvasElement;
+    contextOutput: CanvasRenderingContext2D;
+    contextActive: CanvasRenderingContext2D;
+    canvasCurrent: HTMLCanvasElement;
+    contextCurrent: CanvasRenderingContext2D;
+    canvasActive: HTMLCanvasElement;
+
+    constructor(pqPaint:PandaqiPaint) 
     {
         this.pqPaint = pqPaint;
         this.drawing = false;
         this.lastDrawPos = null;
         this.canvasResolution = { width: 1280, height: 720 };
-        this.drawBuffer = [];
-        this.drawCanvas = null;
 
         this.createCanvasElements();
         this.attachMouseEvents();
@@ -22,7 +33,7 @@ export default class PaintCanvas
 
     download()
     {
-        var link = document.createElement('a');
+        const link = document.createElement('a');
         link.download = '[Pandaqi Paint] Canvas.png';
         link.href = this.canvasOutput.toDataURL()
         link.click();
@@ -42,7 +53,7 @@ export default class PaintCanvas
 
     createCanvasElements()
     {
-        let canv = this.createCanvasElement();
+        const canv = this.createCanvasElement();
         this.pqPaint.getContainerNode().appendChild(canv);
         canv.style.width = "100%";
         canv.classList.add("paint-canvas");
@@ -50,14 +61,14 @@ export default class PaintCanvas
         const params = { willReadFrequently: true, imageSmoothingEnabled: true };
 
         this.canvasOutput = canv;
-        this.contextOutput = canv.getContext("2d", params);
+        this.contextOutput = canv.getContext("2d", params) as CanvasRenderingContext2D;
         this.clearCanvas(this.canvasOutput, true);
 
         this.canvasCurrent = this.createCanvasElement();
-        this.contextCurrent = this.canvasCurrent.getContext("2d", params); // shouldn't ever be used, ideally
+        this.contextCurrent = this.canvasCurrent.getContext("2d", params) as CanvasRenderingContext2D; // shouldn't ever be used, ideally
 
         this.canvasActive = this.createCanvasElement();
-        this.contextActive = this.canvasActive.getContext("2d", params);
+        this.contextActive = this.canvasActive.getContext("2d", params) as CanvasRenderingContext2D;
 
     }
 
@@ -90,22 +101,22 @@ export default class PaintCanvas
 
         const p = new Point();
         const offset = this.canvasOutput.getBoundingClientRect();
-        p.move({ x: -offset.left, y: -offset.top });
+        p.move(new Point({ x: -offset.left, y: -offset.top }));
 
         if(ev.type == 'touchstart' || ev.type == 'touchmove' || ev.type == 'touchend' || ev.type == 'touchcancel')
         {
             var evt = (typeof ev.originalEvent === 'undefined') ? ev : ev.originalEvent;
             var touch = evt.touches[0] || evt.changedTouches[0];
-            p.move({ x: touch.clientX, y: touch.clientY });
+            p.move(new Point({ x: touch.clientX, y: touch.clientY }));
         } else if (ev.type == 'mousedown' || ev.type == 'mouseup' || ev.type == 'mousemove' || ev.type == 'mouseover'|| ev.type == 'mouseout' || ev.type == 'mouseenter' || ev.type=='mouseleave' ) {
-            p.move({ x: ev.clientX, y: ev.clientY });
+            p.move(new Point({ x: ev.clientX, y: ev.clientY }));
         } 
         
         const finalPos = this.convertRealPosToCanvasPos(p);
         return finalPos;
     }
 
-    collectToolParams(ev)
+    collectToolParams(ev) : ToolParams
     {
         return {
             pos: this.getPosFromEvent(ev),
@@ -170,7 +181,7 @@ export default class PaintCanvas
         }
     }
 
-    setStateTo(state)
+    setStateTo(state:HTMLCanvasElement)
     {
         this.clearCanvas(this.canvasCurrent);
         this.contextCurrent.drawImage(state, 0, 0);

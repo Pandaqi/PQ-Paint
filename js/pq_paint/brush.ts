@@ -1,8 +1,34 @@
 import Point from "./point"
 import Config from "./config"
+import Color from "./color";
 
+interface BrushParams
+{
+    radius?: number,
+    hardness?: number,
+    opacity?: number,
+    color?: Color
+}
+
+interface LineParams
+{
+    color?: Color,
+    lineWidth?: number
+}
+
+export { Brush, BrushParams, LineParams }
 export default class Brush
 {
+    radius: number;
+    hardness: number;
+    channelOrder: string[];
+    opacity: number;
+    color: Color;
+    canvasDirty: boolean;
+    canvasCached: HTMLCanvasElement;
+    canvasSmudgeCached: HTMLCanvasElement;
+    gradientCached: CanvasGradient;
+
     constructor()
     {
         const defParams = Config.DEFAULT_BRUSH_PARAMS;
@@ -30,7 +56,7 @@ export default class Brush
         Config.dispatchEvent("brushChanged", { brush: this });
     }
 
-    createCanvas()
+    createCanvas() : HTMLCanvasElement
     {
         const canv = document.createElement("canvas");
         canv.width = this.radius * 2;
@@ -52,7 +78,7 @@ export default class Brush
         this.canvasDirty = false;
     }
 
-    getAlphaFalloff(centerPoint)
+    getAlphaFalloff(centerPoint:Point)
     {
         const distToCenter = Math.sqrt(Math.pow(centerPoint.x - this.radius, 2) + Math.pow(centerPoint.y - this.radius, 2));
         const distToCenterUnit = distToCenter / this.radius;
@@ -84,7 +110,8 @@ export default class Brush
         }
     }
 
-    getPreviewCanvas() { 
+    getPreviewCanvas() 
+    { 
         const canv = this.createCanvas();
         const maxSize = 2*Config.RADIUS_BOUNDS.max;
         canv.width = maxSize;
@@ -104,21 +131,21 @@ export default class Brush
     getImage() { return this.canvasCached; }
 
     getOpacity() { return this.opacity; }
-    setOpacity(o)
+    setOpacity(o:number)
     {
         this.opacity = o;
         this.onChange();
     }
 
     getHardness() { return this.hardness; }
-    setHardness(h)
+    setHardness(h:number)
     {
         this.hardness = h;
         this.onChange();
     }
 
     getSize() { return this.radius; }
-    setSize(s)
+    setSize(s:number)
     {
         this.radius = Config.clamp(s, Config.RADIUS_BOUNDS);
         this.onChange();
@@ -126,10 +153,10 @@ export default class Brush
 
     getColor() { return this.color; }
     getColorWithOpacity() { const c = this.color.clone(); c.setAlpha(this.opacity); return c; }
-    setColor(c) { this.color = c; this.onChange(); }
+    setColor(c:Color) { this.color = c; this.onChange(); }
 
-    getColorChannel(channelName) { return this.color.getChannel(channelName); }
-    setColorChannel(channelName, value)
+    getColorChannel(channelName:string) { return this.color.getChannel(channelName); }
+    setColorChannel(channelName:string, value:number)
     {
         this.color.setChannel(channelName, value);
         this.onChange();
@@ -145,7 +172,7 @@ export default class Brush
         }
     }
 
-    setCanvasPixel(context, point, color)
+    setCanvasPixel(context:CanvasRenderingContext2D, point:Point, color:Color)
     {
         context.fillStyle = color.toString();
         context.fillRect(point.x, point.y, 1, 1);
@@ -175,12 +202,12 @@ export default class Brush
         return this.channelOrder.length;
     }
 
-    getPixelID(imageData, point)
+    getPixelID(imageData, point:Point)
     {
         return (point.y * imageData.width + point.x) * this.getNumChannels();
     }
 
-    offsetPointForDrawing(p)
+    offsetPointForDrawing(p:Point)
     {
         return p.clone().move(new Point().setXY(-this.radius, -this.radius));
     }
@@ -190,7 +217,7 @@ export default class Brush
         return Math.max(Math.round(this.radius * 0.1), 1);
     }
 
-    interpolateBetweenPoints(start, end, stepSize = 1, includeStart = true, snapEnd = true)
+    interpolateBetweenPoints(start:Point, end:Point, stepSize = 1, includeStart = true, snapEnd = true)
     {
         if(!start) { return [end.clone()]; }
         if(!end) { return [start.clone()]; }
@@ -218,7 +245,7 @@ export default class Brush
         return list;
     }
 
-    updateSmudgeCanvas(pos, canvasToCopy)
+    updateSmudgeCanvas(pos:Point, canvasToCopy:HTMLCanvasElement)
     {
         // first copy what's underneath us in the actual canvas
         const canv = this.canvasSmudgeCached;
@@ -240,7 +267,7 @@ export default class Brush
         ctx.restore();
     }
 
-    createFeatherGradient(canvas) 
+    createFeatherGradient(canvas:HTMLCanvasElement) 
     {
         const ctx = canvas.getContext("2d");
         const innerRadius = Math.min(this.radius * this.hardness, this.radius - 1);

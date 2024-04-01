@@ -1,27 +1,30 @@
 import Point from "../point"
 import Config from "../config"
+import Color from "../color";
+import { ToolParams } from "./main";
+import Tool from "./tool";
 
-export default class FillTool
+const NEIGHBOR_OFFSETS = [
+    new Point().setXY(1,0),
+    new Point().setXY(0,1),
+    new Point().setXY(-1,0),
+    new Point().setXY(0,-1)
+]
+
+export default class FillTool extends Tool
 {
     constructor()
     {
+        super();
         this.cursor = "cell";
-        this.neighborOffsets = [
-            new Point().setXY(1,0),
-            new Point().setXY(0,1),
-            new Point().setXY(-1,0),
-            new Point().setXY(0,-1)
-        ]
     }
 
-    onDrawStart(params) {}
-    onDrawProgress(params) {}
-    onDrawEnd(params)
+    onDrawEnd(params:ToolParams)
     {
         this.floodFill(params);
     }
 
-    floodFill(params)
+    floodFill(params:ToolParams)
     {
         const pos = params.pos.clone().round();
         const canvas = params.pqPaint.getCanvas();
@@ -81,18 +84,18 @@ export default class FillTool
         canvas.commitCanvasActive();
     }
 
-    colorsTooFarApart(color, raw, t)
+    colorsTooFarApart(color:Color, raw, t)
     {
         return Math.abs(color.r - raw[0]/255.0) > t || Math.abs(color.g - raw[1]/255.0) > t ||  Math.abs(color.b - raw[2]/255.0) > t;
     }
 
-    getPixelRaw(imageData, point) 
+    getPixelRaw(imageData, point:Point) 
     {
         const offset = (point.y * imageData.width + point.x) * 4;
         return imageData.data.slice(offset, offset + 4);
     }
 
-    outOfBounds(pos, canvasSize)
+    outOfBounds(pos:Point, canvasSize)
     {
         return (pos.x < 0 || pos.y < 0) || (pos.x >= canvasSize.width || pos.y >= canvasSize.height);
     }
@@ -103,7 +106,7 @@ export default class FillTool
         for(let i = 0; i < 4; i++)
         {
             const nbPos = pixel.clone();
-            nbPos.move(this.neighborOffsets[i]);
+            nbPos.move(NEIGHBOR_OFFSETS[i]);
             if(this.outOfBounds(nbPos, canvasSize)) { continue; }
             list.push(nbPos.round());
         }

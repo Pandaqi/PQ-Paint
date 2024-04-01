@@ -1,16 +1,21 @@
 import Point from "../point"
 import CanvasOperation from "../canvasOperation";
+import Tool from "./tool";
+import { ToolParams } from "./main";
 
-export default class SmudgeTool
+export default class SmudgeTool extends Tool
 {
+    brushCanvas: HTMLCanvasElement;
+
     constructor()
     {
+        super();
         this.cursor = "pointer";
         this.brushCanvas = null;
     }
     
     getBrushCanvas() { return this.brushCanvas; }
-    updateBrushCanvas(params)
+    updateBrushCanvas(params:ToolParams)
     {
         const brush = params.pqPaint.getBrush()
         const canvasToCopy = params.pqPaint.getCanvas().getCanvasOutput();
@@ -18,13 +23,13 @@ export default class SmudgeTool
         brush.updateSmudgeCanvas(pos, canvasToCopy);
     }
 
-    onDrawStart(params)
+    onDrawStart(params:ToolParams)
     {
         this.updateBrushCanvas(params);
         this.brushCanvas = params.pqPaint.getBrush().getSmudgeImage();
     }
 
-    onDrawProgress(params)
+    onDrawProgress(params:ToolParams)
     {
         const canvas = params.pqPaint.getCanvas();
         const brush = params.pqPaint.getBrush();
@@ -50,7 +55,7 @@ export default class SmudgeTool
         }        
     }
 
-    onDrawEnd(params)
+    onDrawEnd(params:ToolParams)
     {
         params.pqPaint.getCanvas().commitCanvasActive();
         this.brushCanvas = null;

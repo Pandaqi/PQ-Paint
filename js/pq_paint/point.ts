@@ -1,19 +1,23 @@
-export default class Point {
-    constructor(p = {})
+export default class Point 
+{
+    x: number;
+    y: number;
+
+    constructor(p:Record<string,number> = {})
     {
-        this.x = p.x || 0;
-        this.y = p.y || 0;
+        this.x = p.x ?? 0;
+        this.y = p.y ?? 0;
     }
 
-    clone() { return new Point(this); }
+    clone() { return new Point({ x: this.x, y: this.y }); }
     round() { return this.setXY(Math.round(this.x), Math.round(this.y)); }
 
     // setting/overriding
     setX(v = 0) { this.x = v; return this; }
     setY(v = 0) { this.y = v; return this; }
-    fromXY(x,y) { return this.setXY(x,y); }
-    setXY(x,y) { return this.set({ x: x, y: y }); }
-    setFactor(f) { return this.setXY(f,f); }
+    fromXY(x = 0, y = 0) { return this.setXY(x,y); }
+    setXY(x = 0, y = 0) { return this.set(new Point({ x: x, y: y })); }
+    setFactor(f = 1.0) { return this.setXY(f,f); }
     set(p = new Point())
     {
         this.setX(p.x);
@@ -24,8 +28,8 @@ export default class Point {
     // changing/moving
     moveX(v = 0) { return this.setX(this.x + v); }
     moveY(v = 0) { return this.setY(this.y + v); }
-    moveXY(x,y) { return this.move({ x: x, y: y }); }
-    moveFactor(f) { return this.moveXY(f,f); }
+    moveXY(x = 0, y = 0) { return this.move(new Point({ x: x, y: y })); }
+    moveFactor(f = 1.0) { return this.moveXY(f,f); }
     add(p = new Point()) { return this.move(p); }
     sub(p = new Point()) { return this.add(p.clone().scaleFactor(-1)); }
     move(p = new Point())
@@ -38,8 +42,8 @@ export default class Point {
     // scaling
     scaleX(v = 0) { return this.setX(v * this.x); }
     scaleY(v = 0) { return this.setY(v * this.y); }
-    scaleXY(x,y) { return this.scale({ x: x, y: y }); }
-    scaleFactor(f) { return this.scaleXY(f,f); }
+    scaleXY(x = 1.0, y = 1.0) { return this.scale(new Point({ x: x, y: y })); }
+    scaleFactor(f = 1.0) { return this.scaleXY(f,f); }
     scale(p = new Point())
     {
         this.scaleX(p.x);

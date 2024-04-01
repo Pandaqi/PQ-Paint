@@ -1,33 +1,41 @@
+import Brush from "../brush";
 import CanvasOperation from "../canvasOperation"
 import Config from "../config"
+import Point from "../point";
+import { ToolParams } from "./main";
+import Tool from "./tool";
 
-export default class PenTool
+export default class PenTool extends Tool
 {
+    compositeOperation: GlobalCompositeOperation;
+    points: ToolParams[];
+
     constructor()
     {
+        super();
         this.cursor = "pointer";
         this.compositeOperation = "source-over";
     }
 
-    onDrawStart(params)
+    onDrawStart(params:ToolParams)
     {
         this.points = [];
         this.drawAt(params);
     }
 
-    onDrawProgress(params)
+    onDrawProgress(params:ToolParams)
     {
         this.points.push(params);
         this.drawAt(params);
     }
 
-    onDrawEnd(params)
+    onDrawEnd(params:ToolParams)
     {
         params.pqPaint.getCanvas().commitCanvasActive();
         this.points = [];
     }
 
-    drawAt(params)
+    drawAt(params:ToolParams)
     {
         const brush = params.pqPaint.getBrush();
         const pointList = this.getSmoothPointList(brush);
@@ -35,7 +43,7 @@ export default class PenTool
         params.pqPaint.getCanvas().drawOnActiveCanvas(canvasOperation);
     }
 
-    getSmoothPointList(brush)
+    getSmoothPointList(brush:Brush)
     {
         const list = [];
         let lastPoint = null;
@@ -49,7 +57,7 @@ export default class PenTool
         return list;
     }
 
-    createCanvasOperation(brush, pointList)
+    createCanvasOperation(brush:Brush, pointList:Point[])
     {
         const canvasOperation = new CanvasOperation();
         canvasOperation.alpha = brush.getOpacity();

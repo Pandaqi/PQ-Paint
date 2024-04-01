@@ -4,20 +4,32 @@ import PickerTool from "./pickerTool"
 import FillTool from "./fillTool"
 import SmudgeTool from "./smudgeTool"
 import PenTool from "./penTool"
-
 import Config from "../config"
+import Point from "../point"
+import PandaqiPaint from "../pandaqiPaint"
 
+interface ToolParams
+{
+    pos: Point,
+    lastDrawPos: Point,
+    pqPaint: PandaqiPaint
+}
+
+export { Tools, ToolParams }
 export default class Tools
 {
+    toolSelected: string
+    tools: Record<string,any>
+
     constructor()
     {
         this.toolSelected = Config.DEFAULT_TOOL;
         this.tools = {
-            "pen": new PenTool(),
-            "brush": new BrushTool(),
-            "eraser": new EraserTool(),
-            "picker": new PickerTool(),
-            "fill": new FillTool(),
+            pen: new PenTool(),
+            brush: new BrushTool(),
+            eraser: new EraserTool(),
+            picker: new PickerTool(),
+            fill: new FillTool(),
             //"smudge": new SmudgeTool(),
         }
 
@@ -31,9 +43,11 @@ export default class Tools
         Config.addEventListener("drawEnd", (ev) => { this.getSelected().onDrawEnd(ev.detail.params); })
     }
     
-    toolExists(val) {
+    toolExists(val) 
+    {
         return Object.keys(this.tools).includes(val);
     }
+
     setTo(val) { 
         val = val.toLowerCase();
         if(!this.toolExists(val)) { return console.error("No tool exists with name", val); }

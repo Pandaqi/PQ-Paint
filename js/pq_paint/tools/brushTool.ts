@@ -1,35 +1,45 @@
+import Brush from "../brush";
 import CanvasOperation from "../canvasOperation"
 import Config from "../config"
+import Point from "../point";
+import { ToolParams } from "./main";
+import Tool from "./tool";
 
-export default class BrushTool
+export default class BrushTool extends Tool
 {
+    drawCanvas: HTMLCanvasElement;
+    cursor: string;
+    compositeOperation: GlobalCompositeOperation;
+    points: ToolParams[];
+
     constructor()
     {
+        super();
         this.drawCanvas = null;
         this.cursor = "pointer";
         this.compositeOperation = "source-over"; // multiply? darken?
     }
 
-    onDrawStart(params)
+    onDrawStart(params:ToolParams)
     {
         this.points = [];
         this.drawCanvas = params.pqPaint.getBrush().getImage();
         this.drawAt(params);
     }
 
-    onDrawProgress(params)
+    onDrawProgress(params:ToolParams)
     {
         this.drawAt(params);
     }
 
-    onDrawEnd(params)
+    onDrawEnd(params:ToolParams)
     {
         params.pqPaint.getCanvas().commitCanvasActive();
         this.drawCanvas = null;
         this.points = [];
     }
 
-    drawAt(params)
+    drawAt(params:ToolParams)
     {
         this.points.push(params);
         const brush = params.pqPaint.getBrush();
@@ -38,9 +48,9 @@ export default class BrushTool
         params.pqPaint.getCanvas().drawOnActiveCanvas(canvasOperation);
     }
 
-    getSmoothPointList(brush)
+    getSmoothPointList(brush:Brush)
     {
-        const list = [];
+        const list : Point[] = [];
         let lastPoint = null;
         for(const rawData of this.points)
         {
@@ -52,7 +62,7 @@ export default class BrushTool
         return list;
     }
 
-    createCanvasOperation(brush, points)
+    createCanvasOperation(brush:Brush, points:Point[])
     {
         const canvasOperation = new CanvasOperation();
         canvasOperation.alpha = brush.getOpacity();
